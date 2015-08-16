@@ -1,17 +1,29 @@
-#!/bin/sh
+#!/bin/bash
 # init.d script for dynamic dns service (cloudflare.com)
 
-CLIENT_PROG="nodejs /home/joel/Projects/js/cloudflare-client/main.js"
+CLIENT_PROG="nodejs /home/joel/Projects/js/cloudflare-client/daemon.js"
 NAME=cloudflare_client
+PIDFILE=pidfile
 
 case "$1" in
     start)
+        if [ -f $PIDFILE ]; then
+            echo "$NAME is already running!"
+            exit;
+        fi
         echo "Starting $NAME"
-        $CLIENT_PROG
+        $CLIENT_PROG > /dev/null & 
+        echo $! > pidfile 
     ;;
     stop)
         echo -n "Shutting down $NAME."
-        killproc -TERM $CLIENT_PROG
+        if [ -f $PIDFILE ]; then
+            kill -9 `cat $PIDFILE`
+            rm -f $PIDFILE
+        else
+            echo "$NAME is not running...at least there is no $PIDFILE"
+        fi
+        echo ""
     ;;
     *)
         echo "Usage: $0 {start|stop}"

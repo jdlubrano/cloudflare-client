@@ -1,0 +1,14 @@
+main
+    get current ip address
+    check current ip vs file
+    if changed
+        update
+    else
+        log unchanged and return
+
+update
+    get zone_id by using domain name
+        get dns records
+            change type A records
+                update type A records
+
