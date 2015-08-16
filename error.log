@@ -1,4 +1,0 @@
-{"level":"error","message":"bad response code (400)","timestamp":"2015-08-15T22:57:50.524Z"}
-{"success":false,"errors":[{"code":7003,"message":"Could not route to /zones/undefined/39fd0f32fff40167d7285fbf3c5b4b71, perhaps your object identifier is invalid?"},{"code":7000,"message":"No route for that URI"}],"messages":[],"result":null,"level":"error","message":"PUT unsuccessful","timestamp":"2015-08-15T22:57:50.529Z"}
-{"level":"error","message":"bad response code (400)","timestamp":"2015-08-15T22:57:50.572Z"}
-{"success":false,"errors":[{"code":7003,"message":"Could not route to /zones/undefined/30bd160b2d715e800052c2a0e5a2d167, perhaps your object identifier is invalid?"},{"code":7000,"message":"No route for that URI"}],"messages":[],"result":null,"level":"error","message":"PUT unsuccessful","timestamp":"2015-08-15T22:57:50.573Z"}
