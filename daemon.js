@@ -10,7 +10,7 @@ var logger = new (winston.Logger)({
     transports: [
         new (winston.transports.Console)(),
         new (winston.transports.File)({
-            filename: './error.log',
+            filename: '/var/log/cloudflareclient.log',
             level: 'info' 
         })
     ]
@@ -199,5 +199,5 @@ function main() {
 
 var interval = 60 * 5 * 1000;
 main();
-setInterval(main, 15*1000);
+setInterval(main, interval);
 
