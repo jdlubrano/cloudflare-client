@@ -1,0 +1,20 @@
+#!/bin/sh
+# init.d script for dynamic dns service (cloudflare.com)
+
+CLIENT_PROG="nodejs /home/joel/Projects/js/cloudflare-client/main.js"
+NAME=cloudflare_client
+
+case "$1" in
+    start)
+        echo "Starting $NAME"
+        $CLIENT_PROG
+    ;;
+    stop)
+        echo -n "Shutting down $NAME."
+        killproc -TERM $CLIENT_PROG
+    ;;
+    *)
+        echo "Usage: $0 {start|stop}"
+        exit 1
+esac
+exit 0

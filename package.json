@@ -1,0 +1,12 @@
+{
+  "name": "cloudflare-client",
+  "version": "0.0.0",
+  "description": "Update the DNS settings for a Cloudflare application",
+  "main": "main.js",
+  "author": "Joel Lubrano",
+  "dependencies": [
+    "winston": "~1.0.0",
+    "lodash": "~3.10.0",
+    "request": "~2.60.0"
+  ]
+}
