@@ -6,16 +6,36 @@ var request = require('request');
 var _ = require('lodash');
 var winston = require('winston');
 
+// Constants
+var IP_FILE = "ipFile";
+
 var logger = new (winston.Logger)({
     transports: [
         new (winston.transports.Console)(),
         new (winston.transports.File)({
-            filename: '/var/log/cloudflareclient.log',
-            timestamp: function() { return Date.now(); },
+            filename: 'error.log',
+            // filename: '/var/log/cloudflareclient.log',
+            timestamp: function() {
+                var dt = new Date();
+                return dt.toString();
+            },
             level: 'info' 
         })
     ]
 });
+
+/**
+ * Hacky function to delete the ipFile so that the next
+ * time that the daemon iterates, the ip will be updated.
+ */
+function deleteIpFile() {
+    logger.info("Deleting IP File...");
+    fs.unlink(IP_FILE, function(err) {
+        if(err) {
+            logerr("Delete IP file " + IP_FILE, err);
+        }
+    });
+}
 
 function logerr(msg, error) {
     error = JSON.stringify(error);
@@ -23,10 +43,14 @@ function logerr(msg, error) {
     logger.error(errmsg);
 }
 
-var cloudflareSettings = {
-    "apiKey": "0bcaa0af019075127f76b143f9fb6467e1e34",
-    "authEmail": "joel.lubrano@gmail.com",
-    "appDomain": "jdlubrano.work",
+var getCloudflareSettings = function() {
+    try {
+        var json = fs.readFileSync('cloudflare.settings');
+        var settings = JSON.parse(json);
+        return settings;
+    } catch(e) {
+        logerr("Read/parse cloudflare settings file", e);
+    }
 };
 
 var cloudflareUrl = function(path) {
@@ -34,10 +58,13 @@ var cloudflareUrl = function(path) {
     return hostname + path;
 };
 
-var requestHeaders = {
-    "Content-Type": "application/json",
-    "X-Auth-Key": cloudflareSettings.apiKey,
-    "X-Auth-Email": cloudflareSettings.authEmail
+var requestHeaders = function() {
+    var cloudflareSettings = getCloudflareSettings();
+    return {
+        "Content-Type": "application/json",
+        "X-Auth-Key": cloudflareSettings.apiKey,
+        "X-Auth-Email": cloudflareSettings.authEmail
+    };
 };
 
 function responseGood(response) {
@@ -56,7 +83,7 @@ function getDnsRecords(zoneId, callback) {
     var getDnsRecordsOpts = {
         method: 'GET',
         uri: cloudflareUrl("zones/" + zoneId + '/dns_records'),
-        headers: requestHeaders
+        headers: requestHeaders()
     };
     request(getDnsRecordsOpts, function handleDnsRecords(error, response, body) {
         logger.info("getting dns records...");
@@ -84,6 +111,8 @@ function handleUpdateResponse(error, response, body) {
         var result = JSON.parse(body);
         if(result.success !== true) {
             logger.error("PUT unsuccessful", result);
+        } else {
+            logger.info("Successfully updated DNS settings!");
         }
     } catch(error) {
         logger.error("parsing update response", error);
@@ -98,7 +127,7 @@ function updateDnsRecord(record, ip) {
     var updateDnsRecordOpts = {
         method: 'PUT',
         uri: cloudflareUrl("zones/" + zoneId + "/dns_records/" + record.id),
-        headers: requestHeaders,
+        headers: requestHeaders(),
         body: recordStr
     };
     logger.info('updating dns records');
@@ -117,10 +146,11 @@ function updateIpInZone(zoneId, ip) {
 }
 
 function updateCloudFlare(ip) {
+    var cloudflareSettings = getCloudflareSettings();
     var getZoneOpts = {
         method: 'GET',
         uri: cloudflareUrl("zones/?name=" + cloudflareSettings.appDomain),
-        headers: requestHeaders
+        headers: requestHeaders()
     };
     request(getZoneOpts, function(error, response, body) {
         logger.info("getting zone...");
@@ -133,7 +163,7 @@ function updateCloudFlare(ip) {
         }
         try {    
             var zoneId = JSON.parse(body).result[0].id;
-            logger.info(zoneId);
+            logger.info("Zone ID: " + zoneId);
             updateIpInZone(zoneId, ip);
         } catch(err) {
             logerr("parsing 'get zone' body", err);
@@ -152,7 +182,7 @@ function writeIpToFile(ip, ipFile) {
 }
 
 function checkIpChanged(ip, ipChangedCallback, ipUnchangedCallback) {
-    var ipFile = "ipFile";
+    var ipFile = IP_FILE;
     var fileExists = fs.existsSync(ipFile);
     if(fileExists) {
         fs.readFile(ipFile, function(err, ipRead) {
@@ -199,6 +229,7 @@ function main() {
 }
 
 var interval = 60 * 5 * 1000;  // 5 minutes
+deleteIpFile();
 main();
 setInterval(main, interval);
 
