@@ -1,12 +1,16 @@
 {
   "name": "cloudflare-client",
   "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jdlubrano/cloudflare-client"
+  },
   "description": "Update the DNS settings for a Cloudflare application",
   "main": "main.js",
   "author": "Joel Lubrano",
-  "dependencies": [
+  "dependencies": {
     "winston": "~1.0.0",
     "lodash": "~3.10.0",
     "request": "~2.60.0"
-  ]
+  }
 }
