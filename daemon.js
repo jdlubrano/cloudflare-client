@@ -198,7 +198,7 @@ function main() {
     getMyIp(handleIpResponse);
 }
 
-var interval = 60 * 5 * 1000;
+var interval = 60 * 5 * 1000;  // 5 minutes
 main();
 setInterval(main, interval);
 
