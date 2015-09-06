@@ -29,6 +29,7 @@ var logger = new (winston.Logger)({
  * time that the daemon iterates, the ip will be updated.
  */
 function deleteIpFile() {
+    if(!fs.fileExistsSync(IP_FILE)) return;
     logger.info("Deleting IP File...");
     fs.unlink(IP_FILE, function(err) {
         if(err) {
