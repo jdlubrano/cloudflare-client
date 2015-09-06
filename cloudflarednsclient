@@ -1,9 +1,10 @@
 #!/bin/bash
 # init.d script for dynamic dns service (cloudflare.com)
 
-CLIENT_PROG="nodejs /home/joel/Projects/js/cloudflare-client/daemon.js"
+INSTALL_DIR="/opt/cloudflare_client"
+CLIENT_PROG="nodejs $INSTALL_DIR/daemon.js"
 NAME=cloudflare_client
-PIDFILE=pidfile
+PIDFILE=/opt/cloudflare_client/pidfile
 
 case "$1" in
     start)
@@ -11,9 +12,12 @@ case "$1" in
             echo "$NAME is already running!"
             exit;
         fi
+        START_DIR=`pwd`
+        cd $INSTALL_DIR
         echo "Starting $NAME"
         $CLIENT_PROG > /dev/null & 
-        echo $! > pidfile 
+        echo $! > $PIDFILE
+        cd $START_DIR
     ;;
     stop)
         echo -n "Shutting down $NAME."
